@@ -142,3 +142,8 @@ This made the code easier to test and kept classes loosely connected.
   empty `__init__.py` files so Python sees them as packages.
 - Getting the Singleton and the tests to play nicely (see the Singleton
   trade-off above).
+- My first Singleton only *checked* `Balance._instance` in the constructor
+  but never *set* it. In a brand-new program, calling `Balance()` twice
+  made two separate balances. The fix was one line, `Balance._instance =
+  self`, plus tests that start from a fresh state (before
+  `get_instance()` is ever called) to prove it.

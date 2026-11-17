@@ -70,5 +70,30 @@ class TestBalanceSingletonRules(unittest.TestCase):
         self.assertEqual(self.balance.summary(), "Net balance: $12.50")
 
 
+class TestBalanceFreshStart(unittest.TestCase):
+    """Checks the Singleton before get_instance() has ever been called."""
+
+    def setUp(self):
+        # Pretend this is a brand-new program with no balance yet, and put
+        # the real one back afterwards so other tests are not affected.
+        saved = Balance._instance
+        Balance._instance = None
+        self.addCleanup(setattr, Balance, "_instance", saved)
+
+    def test_first_direct_call_reserves_the_instance(self):
+        first = Balance()
+        self.assertIs(Balance.get_instance(), first)
+
+    def test_second_direct_call_is_blocked(self):
+        Balance()
+        with self.assertRaises(RuntimeError):
+            Balance()
+
+    def test_get_instance_first_then_direct_call_is_blocked(self):
+        Balance.get_instance()
+        with self.assertRaises(RuntimeError):
+            Balance()
+
+
 if __name__ == "__main__":
     unittest.main()

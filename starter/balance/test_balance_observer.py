@@ -18,6 +18,16 @@ class ObserverTestCase(unittest.TestCase):
         self.balance.clear_observers()
         self.messages = []  # fake "screen" passed into the observers
 
+    def _income(self, amount):
+        self.balance.apply_transaction(
+            Transaction(amount, TransactionCategory.INCOME)
+        )
+
+    def _expense(self, amount):
+        self.balance.apply_transaction(
+            Transaction(amount, TransactionCategory.EXPENSE)
+        )
+
 
 class TestLowBalanceAlertObserver(ObserverTestCase):
 
@@ -25,32 +35,32 @@ class TestLowBalanceAlertObserver(ObserverTestCase):
         observer = LowBalanceAlertObserver(threshold=50)
         self.balance.register_observer(observer)
 
-        self.balance.apply_transaction(Transaction(100, TransactionCategory.INCOME))
+        self._income(100)
         self.assertFalse(observer.alert_triggered)
 
-        self.balance.apply_transaction(Transaction(60, TransactionCategory.EXPENSE))
+        self._expense(60)
         self.assertTrue(observer.alert_triggered)
 
-        self.balance.apply_transaction(Transaction(100, TransactionCategory.INCOME))
+        self._income(100)
         self.assertFalse(observer.alert_triggered)
 
-        self.balance.apply_transaction(Transaction(60, TransactionCategory.EXPENSE))
+        self._expense(60)
         self.assertFalse(observer.alert_triggered)
 
-        self.balance.apply_transaction(Transaction(60, TransactionCategory.EXPENSE))
+        self._expense(60)
         self.assertTrue(observer.alert_triggered)
 
     def test_alert_message_is_sent(self):
         observer = LowBalanceAlertObserver(50, output=self.messages.append)
         self.balance.register_observer(observer)
-        self.balance.apply_transaction(Transaction(10, TransactionCategory.EXPENSE))
+        self._expense(10)
         self.assertEqual(len(self.messages), 1)
         self.assertIn("ALERT", self.messages[0])
 
     def test_no_alert_exactly_at_threshold(self):
         observer = LowBalanceAlertObserver(50, output=self.messages.append)
         self.balance.register_observer(observer)
-        self.balance.apply_transaction(Transaction(50, TransactionCategory.INCOME))
+        self._income(50)
         self.assertFalse(observer.alert_triggered)
         self.assertEqual(self.messages, [])
 
@@ -58,9 +68,10 @@ class TestLowBalanceAlertObserver(ObserverTestCase):
 class TestPrintObserver(ObserverTestCase):
 
     def test_prints_on_every_transaction(self):
-        self.balance.register_observer(PrintObserver(output=self.messages.append))
-        self.balance.apply_transaction(Transaction(100, TransactionCategory.INCOME))
-        self.balance.apply_transaction(Transaction(30, TransactionCategory.EXPENSE))
+        observer = PrintObserver(output=self.messages.append)
+        self.balance.register_observer(observer)
+        self._income(100)
+        self._expense(30)
         self.assertEqual(len(self.messages), 2)
         self.assertIn("$100.00", self.messages[0])
         self.assertIn("$70.00", self.messages[1])
@@ -72,14 +83,14 @@ class TestObserverRegistration(ObserverTestCase):
         observer = PrintObserver(output=self.messages.append)
         self.balance.register_observer(observer)
         self.balance.remove_observer(observer)
-        self.balance.apply_transaction(Transaction(10, TransactionCategory.INCOME))
+        self._income(10)
         self.assertEqual(self.messages, [])
 
     def test_same_observer_registered_once(self):
         observer = PrintObserver(output=self.messages.append)
         self.balance.register_observer(observer)
         self.balance.register_observer(observer)
-        self.balance.apply_transaction(Transaction(10, TransactionCategory.INCOME))
+        self._income(10)
         self.assertEqual(len(self.messages), 1)
 
     def test_interface_requires_update(self):

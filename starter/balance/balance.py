@@ -20,6 +20,10 @@ class Balance:
             )
         self._balance = 0.0
         self._observers = []
+        # Reserve the single instance right away, so even the very first
+        # direct call to Balance() counts as "the" balance and any later
+        # call raises the error above.
+        Balance._instance = self
 
     @classmethod
     def get_instance(cls):
