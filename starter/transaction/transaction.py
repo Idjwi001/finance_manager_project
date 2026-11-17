@@ -1,6 +1,7 @@
-# transaction.py
+"""The Transaction class used everywhere inside the app."""
 
 from transaction.transaction_category import TransactionCategory
+
 
 class Transaction:
     """Represents a financial transaction with an amount and category."""
@@ -10,7 +11,16 @@ class Transaction:
         self.category = category
 
     def __str__(self):
-        pass
+        return f"Transaction(${self.amount}, category='{self.category}')"
+
+    def __repr__(self):
+        return str(self)
 
     def __eq__(self, other):
-        pass
+        if not isinstance(other, Transaction):
+            return NotImplemented
+        return (self.amount == other.amount
+                and self.category == other.category)
+
+    def __hash__(self):
+        return hash((self.amount, self.category))

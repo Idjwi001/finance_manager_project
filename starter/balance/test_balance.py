@@ -3,6 +3,7 @@ from balance.balance import Balance
 from transaction.transaction import Transaction
 from transaction.transaction_category import TransactionCategory
 
+
 class TestBalance(unittest.TestCase):
 
     def setUp(self):
@@ -47,6 +48,27 @@ class TestBalance(unittest.TestCase):
         self.balance.add_expense(50)
         self.balance.reset()
         self.assertEqual(self.balance.get_balance(), 0.0)
+
+
+class TestBalanceSingletonRules(unittest.TestCase):
+
+    def setUp(self):
+        self.balance = Balance.get_instance()
+        self.balance.reset()
+        self.balance.clear_observers()
+
+    def test_direct_instantiation_is_blocked(self):
+        with self.assertRaises(RuntimeError):
+            Balance()
+
+    def test_state_is_shared_between_references(self):
+        Balance.get_instance().add_income(30)
+        self.assertEqual(self.balance.get_balance(), 30)
+
+    def test_summary(self):
+        self.balance.add_income(12.5)
+        self.assertEqual(self.balance.summary(), "Net balance: $12.50")
+
 
 if __name__ == "__main__":
     unittest.main()

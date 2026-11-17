@@ -57,6 +57,17 @@ python -m unittest balance/test_balance_observer.py
 6. Choose and Implement a Fourth Pattern – Pick one additional design pattern (e.g., Strategy, Command, Decorator, etc.) and integrate it into your project.
 7. Provide a Reflection – Add a short write-up in your repo (README or separate file) explaining your design choices.
 
+## Solution Summary
+
+| Pattern   | Where                                   | Purpose |
+|-----------|-----------------------------------------|---------|
+| Singleton | `balance/balance.py`                    | One shared balance for the whole app |
+| Adapter   | `transaction/transaction_adapter.py`    | Turns freelance income into a `Transaction` |
+| Observer  | `balance/balance_observer.py`           | Prints balance changes and low-balance alerts |
+| Command   | `command/transaction_command.py`        | Wraps each transaction so it can be undone |
+
+See [REFLECTION.md](REFLECTION.md) for why each pattern was chosen and the trade-offs.
+
 ## Built With
 
 * [Python](https://www.python.org/) – Main programming language
